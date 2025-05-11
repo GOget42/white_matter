@@ -1,0 +1,6 @@
+# created by virtualenv automatically
+EC-Earth3-Veg-LR_future/
+EC-Earth3-Veg-LR_historial/
+IPSL-CM6A-LR_future/
+IPSL-CM6A-LR_historial/
+.venv/
