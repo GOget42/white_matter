@@ -82,20 +82,21 @@ def calculate_snow_resource_data(snow_data, params):
 
     return pd.DataFrame(monthly_data) if monthly_data else pd.DataFrame()
 
-def render_summary_metrics(df):
+def render_summary_metrics(df, start_date, end_date):
     """Zeigt die Zusammenfassungsmetriken an"""
-    st.subheader("Zusammenfassung")
+    st.subheader(f"Zusammenfassung für den Zeitraum {start_date.strftime('%m.%Y')} bis {end_date.strftime('%m.%Y')}")
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():.1f} m³")
+        st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
 
     with col2:
-        st.metric("Gesamtkosten ohne Additiv", f"{df['Gesamtkosten'].sum():.2f} CHF")
-        st.metric("Gesamtkosten mit Additiv", f"{df['Gesamtkosten_mit_Additiv'].sum():.2f} CHF")
-        st.metric("Kosteneinsparung mit Additiv", f"{df['Kosteneinsparung'].sum():.2f} CHF",
-                 delta=f"{df['Kosteneinsparung'].sum() / df['Gesamtkosten'].sum() * 100:.1f}%"
-                 if df['Gesamtkosten'].sum() > 0 else None)
+        st.metric("Gesamtkosten ohne Keimbildner", f"{df['Gesamtkosten'].sum():,.2f}".replace(",", "'") + " CHF")
+        st.metric("Gesamtkosten mit Keimbildner", f"{df['Gesamtkosten_mit_Additiv'].sum():,.2f}".replace(",", "'") + " CHF")
+        st.metric("Kosteneinsparung mit Keimbildner",
+                  f"{df['Kosteneinsparung'].sum():,.2f}".replace(",", "'") + " CHF",
+                  delta=f"{df['Kosteneinsparung'].sum() / df['Gesamtkosten'].sum() * 100:.1f}%"
+                  if df['Gesamtkosten'].sum() > 0 else None)
 
 def plot_snow_demand(df):
     """Erstellt ein Diagramm des monatlichen Schneebedarfs"""
@@ -124,12 +125,12 @@ def plot_costs(df):
     fig.add_trace(go.Bar(
         x=df['Datum'],
         y=df['Gesamtkosten'],
-        name='Ohne Additiv'
+        name='Ohne Keimbildner'
     ))
     fig.add_trace(go.Bar(
         x=df['Datum'],
         y=df['Gesamtkosten_mit_Additiv'],
-        name='Mit Additiv'
+        name='Mit Keimbildner'
     ))
     fig.update_layout(
         title="Kosten pro Monat",
@@ -150,12 +151,12 @@ def plot_resource_usage(df, resource_choice):
         fig.add_trace(go.Bar(
             x=df['Datum'],
             y=df['Wasserverbrauch_l'] / 1000,  # Umrechnung in m³
-            name='Ohne Additiv'
+            name='Ohne Keimbildner'
         ))
         fig.add_trace(go.Bar(
             x=df['Datum'],
             y=df['Wasserverbrauch_mit_Additiv_l'] / 1000,
-            name='Mit Additiv'
+            name='Mit Keimbildner'
         ))
         fig.update_layout(
             title="Wasserverbrauch pro Monat",
@@ -168,12 +169,12 @@ def plot_resource_usage(df, resource_choice):
         fig.add_trace(go.Bar(
             x=df['Datum'],
             y=df['Energieverbrauch_kwh'],
-            name='Ohne Additiv'
+            name='Ohne Keimbildner'
         ))
         fig.add_trace(go.Bar(
             x=df['Datum'],
             y=df['Energieverbrauch_mit_Additiv_kwh'],
-            name='Mit Additiv'
+            name='Mit Keimbildner'
         ))
         fig.update_layout(
             title="Energieverbrauch pro Monat",
@@ -190,16 +191,14 @@ def display_detailed_analysis(df):
     st.subheader("Detailanalyse")
 
     detailed_df = df[['Datum', 'DurchschnittlicheSchneehöhe', 'Schneebedarf_m3',
-                      'Schneebedarf_mit_Additiv_m3', 'Gesamtkosten', 'Gesamtkosten_mit_Additiv',
-                      'Kosteneinsparung']]
+                      'Gesamtkosten', 'Gesamtkosten_mit_Additiv', 'Kosteneinsparung']]
 
     detailed_df = detailed_df.rename(columns={
         'Datum': 'Datum',
         'DurchschnittlicheSchneehöhe': 'Schneehöhe (m)',
         'Schneebedarf_m3': 'Schneebedarf (m³)',
-        'Schneebedarf_mit_Additiv_m3': 'Schneebedarf mit Additiv (m³)',
         'Gesamtkosten': 'Kosten (CHF)',
-        'Gesamtkosten_mit_Additiv': 'Kosten mit Additiv (CHF)',
+        'Gesamtkosten_mit_Additiv': 'Kosten mit Keimbildner (CHF)',
         'Kosteneinsparung': 'Einsparung (CHF)'
     })
 
@@ -207,9 +206,9 @@ def display_detailed_analysis(df):
     st.dataframe(detailed_df.style.format({
         'Schneehöhe (m)': '{:.2f}',
         'Schneebedarf (m³)': '{:.1f}',
-        'Schneebedarf mit Additiv (m³)': '{:.1f}',
+        'Schneebedarf mit Keimbildner (m³)': '{:.1f}',
         'Kosten (CHF)': '{:.2f}',
-        'Kosten mit Additiv (CHF)': '{:.2f}',
+        'Kosten mit Keimbildner (CHF)': '{:.2f}',
         'Einsparung (CHF)': '{:.2f}'
     }))
 
@@ -326,7 +325,7 @@ def main():
 
     # Kosten- und Ressourcenparameter
     st.sidebar.subheader("Kosten- und Ressourcenparameter")
-    additive_cost_per_m3 = st.sidebar.number_input("Zusatzstoffkosten pro m³ (CHF)", min_value=0.001, value=0.05, step=0.001)
+    additive_cost_per_m3 = st.sidebar.number_input("Zusatzstoffkosten pro m³ (CHF)", min_value=0.001, value=0.050, step=0.001, format="%.3f")
     water_per_m3 = st.sidebar.number_input("Wasserverbrauch pro m³ Kunstschnee (l)", min_value=50, value=200, step=10)
     energy_per_m3 = st.sidebar.number_input("Energieverbrauch pro m³ Kunstschnee (kWh)", min_value=1.0, value=5.0,
                                       step=0.5)
@@ -367,7 +366,7 @@ def main():
     # Daten anzeigen wenn vorhanden
     if not df.empty:
         # Zusammenfassung
-        render_summary_metrics(df)
+        render_summary_metrics(df, start_date, end_date)
 
         # Monatlicher Schneebedarf
         plot_snow_demand(df)
