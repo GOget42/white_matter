@@ -262,7 +262,7 @@ def main():
         return
 
     # Sidebar für Benutzereingaben
-    st.sidebar.header("Parameter")
+    st.sidebar.header("Einstellungen")
 
     # Mapping der Szenarien auf lesbare Labels
     scenario_labels = {
@@ -278,33 +278,33 @@ def main():
     ] if 'scenario' in ds.coords else ["Standardszenario"]
 
     # Szenario-Auswahl
-    chosen_scenario_label = st.sidebar.selectbox("Szenario wählen", available_scenarios)
+    st.sidebar.subheader("🌤️ Szenario")
+    chosen_scenario_label = st.sidebar.selectbox("Klimaszenario auswählen", available_scenarios)
     chosen_scenario = list(scenario_labels.keys())[list(scenario_labels.values()).index(
         chosen_scenario_label)] if chosen_scenario_label in scenario_labels.values() else chosen_scenario_label
 
-    # Basiseingaben
+    # Basiseingaben mit Icons
+    st.sidebar.subheader("🏔️ Skigebiet")
     min_snow_depth = st.sidebar.number_input("Mindestschneehöhe für Skifahren (m)", min_value=0.1, value=0.5, step=0.1)
+    slope_area = st.sidebar.number_input("Hangfläche (m²)", min_value=1000, value=1000000, step=10000)
 
     # Saisondaten
-    st.sidebar.subheader("Skisaison")
+    st.sidebar.subheader("📅 Skisaison")
     season_start = st.sidebar.selectbox("Saisonbeginn", ["Januar", "Februar", "März", "April", "Mai", "Juni",
-                                                     "Juli", "August", "September", "Oktober", "November",
-                                                     "Dezember"], 10)
+                                                         "Juli", "August", "September", "Oktober", "November",
+                                                         "Dezember"], 10)
     season_end = st.sidebar.selectbox("Saisonende", ["Januar", "Februar", "März", "April", "Mai", "Juni",
-                                                 "Juli", "August", "September", "Oktober", "November", "Dezember"],
-                                  3)
+                                                     "Juli", "August", "September", "Oktober", "November", "Dezember"],
+                                      3)
 
     # Monatsnamen in Zahlen umwandeln
     month_names = ["Januar", "Februar", "März", "April", "Mai", "Juni",
-                  "Juli", "August", "September", "Oktober", "November", "Dezember"]
+                   "Juli", "August", "September", "Oktober", "November", "Dezember"]
     season_start_month = month_names.index(season_start) + 1
     season_end_month = month_names.index(season_end) + 1
 
-    # Hangfläche
-    slope_area = st.sidebar.number_input("Hangfläche (m²)", min_value=1000, value=1000000, step=10000)
-
-    # Prognosezeitraum
-    st.sidebar.subheader("Prognosezeitraum")
+    # Prognosezeitraum mit verbesserten Eingaben
+    st.sidebar.subheader("📊 Analysezeitraum")
 
     # Verfügbare Zeiträume aus den Daten extrahieren
     time_min = pd.to_datetime(ds.time.min().values)
@@ -314,43 +314,47 @@ def main():
     current_year = datetime.now().year
     current_month = datetime.now().month
 
-    start_year = st.sidebar.slider("Startjahr",
-                               min_value=int(time_min.year),
-                               max_value=int(time_max.year),
-                               value=current_year)
+    col1, col2 = st.sidebar.columns(2)
+    with col1:
+        start_year = st.number_input("Startjahr",
+                                     min_value=int(time_min.year),
+                                     max_value=int(time_max.year),
+                                     value=current_year)
+    with col2:
+        start_month = st.selectbox("Startmonat", month_names, index=current_month - 1)
+        start_month = month_names.index(start_month) + 1
 
-    start_month = st.sidebar.slider("Startmonat",
-                                min_value=1,
-                                max_value=12,
-                                value=current_month)
-
-    end_year = st.sidebar.slider("Endjahr",
-                             min_value=int(time_min.year),
-                             max_value=int(time_max.year),
-                             value=min(current_year + 5, int(time_max.year)))
-
-    end_month = st.sidebar.slider("Endmonat",
-                              min_value=1,
-                              max_value=12,
-                              value=current_month)
+    col1, col2 = st.sidebar.columns(2)
+    with col1:
+        end_year = st.number_input("Endjahr",
+                                   min_value=int(time_min.year),
+                                   max_value=int(time_max.year),
+                                   value=min(current_year + 5, int(time_max.year)))
+    with col2:
+        end_month = st.selectbox("Endmonat", month_names, index=current_month - 1)
+        end_month = month_names.index(end_month) + 1
 
     # Zusatzstoffeingaben
-    st.sidebar.subheader("Keimbildner")
+    st.sidebar.subheader("🧪 Keimbildner")
     additive_efficiency = st.sidebar.slider("Effizenz (in % der Ressourcenersparnis)",
-                                        min_value=0,
-                                        max_value=90,
-                                        value=30,
-                                        step=1) / 100
+                                            min_value=0,
+                                            max_value=90,
+                                            value=30,
+                                            step=1) / 100
 
     # Kosten- und Ressourcenparameter
-    st.sidebar.subheader("Kosten- und Ressourcenparameter")
-    additive_cost_per_m3 = st.sidebar.number_input("Zusatzstoffkosten pro m³ (CHF)", min_value=0.001, value=0.050, step=0.001, format="%.3f")
-    water_per_m3 = st.sidebar.number_input("Wasserverbrauch pro m³ Kunstschnee (l)", min_value=50, value=200, step=10)
-    energy_per_m3 = st.sidebar.number_input("Energieverbrauch pro m³ Kunstschnee (kWh)", min_value=1.0, value=5.0,
-                                      step=0.5)
-    water_cost_per_l = st.sidebar.number_input("Wasserkosten pro Liter (CHF)", min_value=0.0001, value=0.002, step=0.0005,
-                                          format="%.4f")
-    energy_cost_per_kwh = st.sidebar.number_input("Energiekosten pro kWh (CHF)", min_value=0.01, value=0.25, step=0.01)
+    st.sidebar.subheader("💰 Kosten & Ressourcen")
+
+    with st.sidebar.expander("Kostenparameter anpassen"):
+        additive_cost_per_m3 = st.number_input("Zusatzstoffkosten pro m³ (CHF)", min_value=0.001, value=0.050,
+                                               step=0.001, format="%.3f")
+        water_cost_per_l = st.number_input("Wasserkosten pro Liter (CHF)", min_value=0.0001, value=0.002, step=0.0005,
+                                           format="%.4f")
+        energy_cost_per_kwh = st.number_input("Energiekosten pro kWh (CHF)", min_value=0.01, value=0.25, step=0.01)
+
+    with st.sidebar.expander("Ressourcenparameter anpassen"):
+        water_per_m3 = st.number_input("Wasserverbrauch pro m³ Kunstschnee (l)", min_value=50, value=200, step=10)
+        energy_per_m3 = st.number_input("Energieverbrauch pro m³ Kunstschnee (kWh)", min_value=1.0, value=5.0, step=0.5)
 
     # Parameter sammeln
     params = {
