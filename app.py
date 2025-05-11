@@ -121,94 +121,65 @@ def render_summary_metrics(df, start_date, end_date):
         st.metric("Ersparnis", f"{einsparung:,.2f}".replace(",", "'") + " CHF",
                   delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
 
-
-def plot_snow_demand(df):
-    """Erstellt ein Diagramm des monatlichen Schneebedarfs"""
-    st.subheader("Monatlicher Schneebedarf")
-
+def plot_monthly_bar_chart(df, y_columns, title, y_axis_title, trace_names, unit_divisor=1):
+    """Universelle Plot-Funktion für gruppierte Monatsdiagramme"""
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=df['Datum'],
-        y=df['Schneebedarf_m3'],
-        name='Standard'
-    ))
+    for col, name in zip(y_columns, trace_names):
+        fig.add_trace(go.Bar(
+            x=df['Datum'],
+            y=df[col] / unit_divisor,
+            name=name
+        ))
+
     fig.update_layout(
-        title="Schneebedarf pro Monat",
+        title=title,
         xaxis_title="Datum",
-        yaxis_title="Schneebedarf (m³)",
+        yaxis_title=y_axis_title,
         barmode='group',
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(t=60)
     )
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
-def plot_costs(df):
-    """Erstellt ein Diagramm der monatlichen Kosten"""
-    st.subheader("Kostenvergleich")
+def render_all_charts(df):
+    tabs = st.tabs(["❄️ Schneebedarf", "💰 Kosten", "💧 Wasser", "⚡ Energie"])
 
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=df['Datum'],
-        y=df['Gesamtkosten'],
-        name='Ohne Keimbildner'
-    ))
-    fig.add_trace(go.Bar(
-        x=df['Datum'],
-        y=df['Gesamtkosten_mit_Additiv'],
-        name='Mit Keimbildner'
-    ))
-    fig.update_layout(
-        title="Kosten pro Monat",
-        xaxis_title="Datum",
-        yaxis_title="Kosten (CHF)",
-        barmode='group',
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    st.plotly_chart(fig)
-
-def plot_resource_usage(df, resource_choice):
-    """Erstellt ein Diagramm des Ressourcenverbrauchs"""
-    st.subheader("Ressourcenverbrauch")
-
-    fig = go.Figure()
-
-    if resource_choice == "Wasserverbrauch":
-        fig.add_trace(go.Bar(
-            x=df['Datum'],
-            y=df['Wasserverbrauch_l'] / 1000,  # Umrechnung in m³
-            name='Ohne Keimbildner'
-        ))
-        fig.add_trace(go.Bar(
-            x=df['Datum'],
-            y=df['Wasserverbrauch_mit_Additiv_l'] / 1000,
-            name='Mit Keimbildner'
-        ))
-        fig.update_layout(
-            title="Wasserverbrauch pro Monat",
-            xaxis_title="Datum",
-            yaxis_title="Wasserverbrauch (m³)",
-            barmode='group',
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
-    else:
-        fig.add_trace(go.Bar(
-            x=df['Datum'],
-            y=df['Energieverbrauch_kwh'],
-            name='Ohne Keimbildner'
-        ))
-        fig.add_trace(go.Bar(
-            x=df['Datum'],
-            y=df['Energieverbrauch_mit_Additiv_kwh'],
-            name='Mit Keimbildner'
-        ))
-        fig.update_layout(
-            title="Energieverbrauch pro Monat",
-            xaxis_title="Datum",
-            yaxis_title="Energieverbrauch (kWh)",
-            barmode='group',
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    with tabs[0]:
+        plot_monthly_bar_chart(
+            df,
+            y_columns=["Schneebedarf_m3"],
+            title="Monatlicher Schneebedarf",
+            y_axis_title="Schneebedarf (m³)",
+            trace_names=["Standard"]
         )
 
-    st.plotly_chart(fig)
+    with tabs[1]:
+        plot_monthly_bar_chart(
+            df,
+            y_columns=["Gesamtkosten", "Gesamtkosten_mit_Additiv"],
+            title="Monatliche Kosten",
+            y_axis_title="Kosten (CHF)",
+            trace_names=["Ohne Keimbildner", "Mit Keimbildner"]
+        )
+
+    with tabs[2]:
+        plot_monthly_bar_chart(
+            df,
+            y_columns=["Wasserverbrauch_l", "Wasserverbrauch_mit_Additiv_l"],
+            title="Monatlicher Wasserverbrauch",
+            y_axis_title="Wasserverbrauch (m³)",
+            trace_names=["Ohne Keimbildner", "Mit Keimbildner"],
+            unit_divisor=1000
+        )
+
+    with tabs[3]:
+        plot_monthly_bar_chart(
+            df,
+            y_columns=["Energieverbrauch_kwh", "Energieverbrauch_mit_Additiv_kwh"],
+            title="⚡ Monatlicher Energieverbrauch",
+            y_axis_title="Energieverbrauch (kWh)",
+            trace_names=["Ohne Keimbildner", "Mit Keimbildner"]
+        )
 
 def display_detailed_analysis(df):
     """Zeigt die detaillierte Analysetabelle an"""
@@ -397,18 +368,11 @@ def main():
         # Zusammenfassung
         render_summary_metrics(df, start_date, end_date)
 
-        # Monatlicher Schneebedarf
-        plot_snow_demand(df)
+        # Diagramme
+        render_all_charts(df)
 
-        # Kosten
-        plot_costs(df)
-
-        # Ressourcenverbrauch
-        resource_choice = st.radio(
-            "Ressourcenvergleich anzeigen für:",
-            ("Wasserverbrauch", "Energieverbrauch")
-        )
-        plot_resource_usage(df, resource_choice)
+        # Divider
+        st.divider()
 
         # Detaillierte Tabelle
         display_detailed_analysis(df)
