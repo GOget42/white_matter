@@ -265,7 +265,7 @@ def main():
     # Basiseingaben mit Icons
     st.sidebar.subheader("🏔️ Skigebiet")
     min_snow_depth = st.sidebar.number_input("Mindestschneehöhe für Skifahren (m)", min_value=0.1, value=0.5, step=0.1)
-    slope_area = st.sidebar.number_input("Hangfläche (m²)", min_value=1000, value=1000000, step=10000)
+    slope_area = st.sidebar.number_input("Pistenfläche (m²)", min_value=1000, value=1000000, step=10000)
 
     # Saisondaten
     st.sidebar.subheader("📅 Skisaison")
