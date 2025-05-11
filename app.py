@@ -85,15 +85,31 @@ def calculate_snow_resource_data(snow_data, params):
 def render_summary_metrics(df, start_date, end_date):
     """Zeigt die Zusammenfassungsmetriken an"""
     st.subheader(f"Zusammenfassung für den Zeitraum {start_date.strftime('%m.%Y')} bis {end_date.strftime('%m.%Y')}")
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
 
     with col2:
+        st.metric("Wasserverbrauch ohne Keimbildner", f"{df['Wasserverbrauch_l'].sum() / 1000:,.1f}".replace(",", "'") + " m³")
+        st.metric("Wasserverbrauch mit Keimbildner", f"{df['Wasserverbrauch_mit_Additiv_l'].sum() / 1000:,.1f}".replace(",", "'") + " m³")
+        st.metric("Wassereinsparung",
+                  f"{(df['Wasserverbrauch_l'].sum() - df['Wasserverbrauch_mit_Additiv_l'].sum()) / 1000:,.1f}".replace(",", "'") + " m³",
+                  delta=f"{(df['Wasserverbrauch_l'].sum() - df['Wasserverbrauch_mit_Additiv_l'].sum()) / df['Wasserverbrauch_l'].sum() * 100:.1f}%"
+                    if df['Wasserverbrauch_l'].sum() > 0 else None)
+
+    with col3:
+        st.metric("Energieverbrauch ohne Keimbildner", f"{df['Energieverbrauch_kwh'].sum():,.1f}".replace(",", "'") + " kWh")
+        st.metric("Energieverbrauch mit Keimbildner", f"{df['Energieverbrauch_mit_Additiv_kwh'].sum():,.1f}".replace(",", "'") + " kWh")
+        st.metric("Energieeinsparung",
+                  f"{df['Energieverbrauch_kwh'].sum() - df['Energieverbrauch_mit_Additiv_kwh'].sum():,.1f}".replace(",", "'") + " kWh",
+                  delta=f"{(df['Energieverbrauch_kwh'].sum() - df['Energieverbrauch_mit_Additiv_kwh'].sum()) / df['Energieverbrauch_kwh'].sum() * 100:.1f}%"
+                    if df['Energieverbrauch_kwh'].sum() > 0 else None)
+
+    with col4:
         st.metric("Gesamtkosten ohne Keimbildner", f"{df['Gesamtkosten'].sum():,.2f}".replace(",", "'") + " CHF")
         st.metric("Gesamtkosten mit Keimbildner", f"{df['Gesamtkosten_mit_Additiv'].sum():,.2f}".replace(",", "'") + " CHF")
-        st.metric("Kosteneinsparung mit Keimbildner",
+        st.metric("Kosteneinsparung",
                   f"{df['Kosteneinsparung'].sum():,.2f}".replace(",", "'") + " CHF",
                   delta=f"{df['Kosteneinsparung'].sum() / df['Gesamtkosten'].sum() * 100:.1f}%"
                   if df['Gesamtkosten'].sum() > 0 else None)
@@ -295,25 +311,28 @@ def main():
     time_max = pd.to_datetime(ds.time.max().values)
 
     # Jahre und Monate für Start- und Endauswahl
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+
     start_year = st.sidebar.slider("Startjahr",
                                min_value=int(time_min.year),
                                max_value=int(time_max.year),
-                               value=int(time_min.year))
+                               value=current_year)
 
     start_month = st.sidebar.slider("Startmonat",
                                 min_value=1,
                                 max_value=12,
-                                value=1)
+                                value=current_month)
 
     end_year = st.sidebar.slider("Endjahr",
                              min_value=int(time_min.year),
                              max_value=int(time_max.year),
-                             value=min(int(time_min.year) + 5, int(time_max.year)))
+                             value=min(current_year + 5, int(time_max.year)))
 
     end_month = st.sidebar.slider("Endmonat",
                               min_value=1,
                               max_value=12,
-                              value=12)
+                              value=current_month)
 
     # Zusatzstoffeingaben
     st.sidebar.subheader("Keimbildner")
