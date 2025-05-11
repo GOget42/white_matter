@@ -93,7 +93,7 @@ def extract_and_combine(input_dir, output_file, bbox):
 
 if __name__ == "__main__":
     input_dir = "IPSL-CM6A-LR_future"
-    output_nc = "switzerland_snowdepth_IPSL-CM6A.nc"
+    output_nc = "snow_depth_prediction.nc"
     # Bounding box for Laax (lon_min, lat_min, lon_max, lat_max)
     bbox = (9.1506, 46.8015, 9.2876, 46.8827)
 
