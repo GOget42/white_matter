@@ -88,31 +88,39 @@ def render_summary_metrics(df, start_date, end_date):
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
+        st.markdown("#### ❄️ Schnee")
         st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
 
     with col2:
-        st.metric("Wasserverbrauch ohne Keimbildner", f"{df['Wasserverbrauch_l'].sum() / 1000:,.1f}".replace(",", "'") + " m³")
-        st.metric("Wasserverbrauch mit Keimbildner", f"{df['Wasserverbrauch_mit_Additiv_l'].sum() / 1000:,.1f}".replace(",", "'") + " m³")
-        st.metric("Wassereinsparung",
-                  f"{(df['Wasserverbrauch_l'].sum() - df['Wasserverbrauch_mit_Additiv_l'].sum()) / 1000:,.1f}".replace(",", "'") + " m³",
-                  delta=f"{(df['Wasserverbrauch_l'].sum() - df['Wasserverbrauch_mit_Additiv_l'].sum()) / df['Wasserverbrauch_l'].sum() * 100:.1f}%"
-                    if df['Wasserverbrauch_l'].sum() > 0 else None)
+        st.markdown("#### 💧 Wasser")
+        ohne = df['Wasserverbrauch_l'].sum() / 1000
+        mit = df['Wasserverbrauch_mit_Additiv_l'].sum() / 1000
+        einsparung = ohne - mit
+        st.metric("Ohne Keimbildner", f"{ohne:,.1f}".replace(",", "'") + " m³")
+        st.metric("Mit Keimbildner", f"{mit:,.1f}".replace(",", "'") + " m³")
+        st.metric("Ersparnis", f"{einsparung:,.1f}".replace(",", "'") + " m³",
+                  delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
 
     with col3:
-        st.metric("Energieverbrauch ohne Keimbildner", f"{df['Energieverbrauch_kwh'].sum():,.1f}".replace(",", "'") + " kWh")
-        st.metric("Energieverbrauch mit Keimbildner", f"{df['Energieverbrauch_mit_Additiv_kwh'].sum():,.1f}".replace(",", "'") + " kWh")
-        st.metric("Energieeinsparung",
-                  f"{df['Energieverbrauch_kwh'].sum() - df['Energieverbrauch_mit_Additiv_kwh'].sum():,.1f}".replace(",", "'") + " kWh",
-                  delta=f"{(df['Energieverbrauch_kwh'].sum() - df['Energieverbrauch_mit_Additiv_kwh'].sum()) / df['Energieverbrauch_kwh'].sum() * 100:.1f}%"
-                    if df['Energieverbrauch_kwh'].sum() > 0 else None)
+        st.markdown("#### ⚡ Energie")
+        ohne = df['Energieverbrauch_kwh'].sum()
+        mit = df['Energieverbrauch_mit_Additiv_kwh'].sum()
+        einsparung = ohne - mit
+        st.metric("Ohne Keimbildner", f"{ohne:,.1f}".replace(",", "'") + " kWh")
+        st.metric("Mit Keimbildner", f"{mit:,.1f}".replace(",", "'") + " kWh")
+        st.metric("Ersparnis", f"{einsparung:,.1f}".replace(",", "'") + " kWh",
+                  delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
 
     with col4:
-        st.metric("Gesamtkosten ohne Keimbildner", f"{df['Gesamtkosten'].sum():,.2f}".replace(",", "'") + " CHF")
-        st.metric("Gesamtkosten mit Keimbildner", f"{df['Gesamtkosten_mit_Additiv'].sum():,.2f}".replace(",", "'") + " CHF")
-        st.metric("Kosteneinsparung",
-                  f"{df['Kosteneinsparung'].sum():,.2f}".replace(",", "'") + " CHF",
-                  delta=f"{df['Kosteneinsparung'].sum() / df['Gesamtkosten'].sum() * 100:.1f}%"
-                  if df['Gesamtkosten'].sum() > 0 else None)
+        st.markdown("#### 💰 Kosten")
+        ohne = df['Gesamtkosten'].sum()
+        mit = df['Gesamtkosten_mit_Additiv'].sum()
+        einsparung = df['Kosteneinsparung'].sum()
+        st.metric("Ohne Keimbildner", f"{ohne:,.2f}".replace(",", "'") + " CHF")
+        st.metric("Mit Keimbildner", f"{mit:,.2f}".replace(",", "'") + " CHF")
+        st.metric("Ersparnis", f"{einsparung:,.2f}".replace(",", "'") + " CHF",
+                  delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
+
 
 def plot_snow_demand(df):
     """Erstellt ein Diagramm des monatlichen Schneebedarfs"""
@@ -371,8 +379,6 @@ def main():
     }
 
     # Hauptbereich: Datenverarbeitung und Anzeige
-    st.header("Schneebedarfsanalyse")
-
     # Date-Range erstellen
     start_date = pd.Timestamp(year=start_year, month=start_month, day=1)
     if end_month == 12:
