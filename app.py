@@ -57,12 +57,11 @@ def calculate_snow_resource_data(snow_data, params):
             total_cost = (water_usage_l * params['water_cost_per_l']) + (energy_usage_kwh * params['energy_cost_per_kwh'])
 
             # Ressourcenberechnung mit Zusatzstoff
-            snow_demand_with_additive_m3 = snow_demand_m3 * (1 - params['additive_efficiency'])
-            water_usage_with_additive_l = snow_demand_with_additive_m3 * params['water_per_m3']
-            energy_usage_with_additive_kwh = snow_demand_with_additive_m3 * params['energy_per_m3']
+            water_usage_with_additive_l = snow_demand_m3 * (params['water_per_m3'] * (1 - params['additive_efficiency']))
+            energy_usage_with_additive_kwh = snow_demand_m3 * (params['energy_per_m3'] * (1 - params['additive_efficiency']))
             total_cost_with_additive = (water_usage_with_additive_l * params['water_cost_per_l']) + \
                                       (energy_usage_with_additive_kwh * params['energy_cost_per_kwh']) + \
-                                      (snow_demand_with_additive_m3 * params['additive_cost_per_m3'])
+                                      (snow_demand_m3 * params['additive_cost_per_m3'])
 
             # Daten für diese Zeit speichern
             monthly_data.append({
@@ -72,7 +71,6 @@ def calculate_snow_resource_data(snow_data, params):
                 'MonatName': month_names[date.month - 1],
                 'DurchschnittlicheSchneehöhe': avg_snow_depth,
                 'Schneebedarf_m3': snow_demand_m3,
-                'Schneebedarf_mit_Additiv_m3': snow_demand_with_additive_m3,
                 'Wasserverbrauch_l': water_usage_l,
                 'Wasserverbrauch_mit_Additiv_l': water_usage_with_additive_l,
                 'Energieverbrauch_kwh': energy_usage_kwh,
@@ -91,12 +89,11 @@ def render_summary_metrics(df):
 
     with col1:
         st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():.1f} m³")
-        st.metric("Schneebedarf mit Additiv", f"{df['Schneebedarf_mit_Additiv_m3'].sum():.1f} m³")
 
     with col2:
-        st.metric("Gesamtkosten ohne Additiv", f"{df['Gesamtkosten'].sum():.2f} €")
-        st.metric("Gesamtkosten mit Additiv", f"{df['Gesamtkosten_mit_Additiv'].sum():.2f} €")
-        st.metric("Kosteneinsparung mit Additiv", f"{df['Kosteneinsparung'].sum():.2f} €",
+        st.metric("Gesamtkosten ohne Additiv", f"{df['Gesamtkosten'].sum():.2f} CHF")
+        st.metric("Gesamtkosten mit Additiv", f"{df['Gesamtkosten_mit_Additiv'].sum():.2f} CHF")
+        st.metric("Kosteneinsparung mit Additiv", f"{df['Kosteneinsparung'].sum():.2f} CHF",
                  delta=f"{df['Kosteneinsparung'].sum() / df['Gesamtkosten'].sum() * 100:.1f}%"
                  if df['Gesamtkosten'].sum() > 0 else None)
 
@@ -109,11 +106,6 @@ def plot_snow_demand(df):
         x=df['Datum'],
         y=df['Schneebedarf_m3'],
         name='Standard'
-    ))
-    fig.add_trace(go.Bar(
-        x=df['Datum'],
-        y=df['Schneebedarf_mit_Additiv_m3'],
-        name='Mit Additiv'
     ))
     fig.update_layout(
         title="Schneebedarf pro Monat",
@@ -142,7 +134,7 @@ def plot_costs(df):
     fig.update_layout(
         title="Kosten pro Monat",
         xaxis_title="Datum",
-        yaxis_title="Kosten (€)",
+        yaxis_title="Kosten (CHF)",
         barmode='group',
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
@@ -206,9 +198,9 @@ def display_detailed_analysis(df):
         'DurchschnittlicheSchneehöhe': 'Schneehöhe (m)',
         'Schneebedarf_m3': 'Schneebedarf (m³)',
         'Schneebedarf_mit_Additiv_m3': 'Schneebedarf mit Additiv (m³)',
-        'Gesamtkosten': 'Kosten (€)',
-        'Gesamtkosten_mit_Additiv': 'Kosten mit Additiv (€)',
-        'Kosteneinsparung': 'Einsparung (€)'
+        'Gesamtkosten': 'Kosten (CHF)',
+        'Gesamtkosten_mit_Additiv': 'Kosten mit Additiv (CHF)',
+        'Kosteneinsparung': 'Einsparung (CHF)'
     })
 
     # Tabelle anzeigen mit Formatierung
@@ -216,9 +208,9 @@ def display_detailed_analysis(df):
         'Schneehöhe (m)': '{:.2f}',
         'Schneebedarf (m³)': '{:.1f}',
         'Schneebedarf mit Additiv (m³)': '{:.1f}',
-        'Kosten (€)': '{:.2f}',
-        'Kosten mit Additiv (€)': '{:.2f}',
-        'Einsparung (€)': '{:.2f}'
+        'Kosten (CHF)': '{:.2f}',
+        'Kosten mit Additiv (CHF)': '{:.2f}',
+        'Einsparung (CHF)': '{:.2f}'
     }))
 
     # CSV-Download-Button
@@ -233,11 +225,11 @@ def display_detailed_analysis(df):
 
 def main():
     # Seitenkonfiguration für ein sauberes Layout
-    st.set_page_config(page_title="Ski Resort Schneemanagementsystem", layout="wide")
+    st.set_page_config(page_title="WAG Keimbildner Analyse", layout="wide")
 
     # Seitentitel und Beschreibung
-    st.title("Ski Resort Schneemanagementsystem")
-    st.write("Analysieren Sie den Schneebedarf und vergleichen Sie Kosten mit und ohne Effizienzadditiv.")
+    st.title("WAG Keimbildner Analyse")
+    st.write("Analysieren Sie den Schneebedarf und vergleichen Sie Kosten mit und ohne Keimbildner.")
 
     # Automatisches Laden der NetCDF-Datei
     nc_file_path = "snow_depth_prediction.nc"
@@ -254,27 +246,26 @@ def main():
     if ds is None:
         return
 
-    # Debug-Informationen zur Datenstruktur - kann später entfernt werden
-    with st.expander("Debug-Informationen"):
-        st.write("Dimensionen:", ds.dims)
-        st.write("Koordinaten:", list(ds.coords))
-        st.write("Datenstruktur:", ds.snow_depth.shape)
-
-        # Prüfen, ob Zeitstempel eindeutig sind
-        time_values = ds.time.values
-        unique_times = np.unique(time_values)
-        st.write(f"Zeitstempel insgesamt: {len(time_values)}")
-        st.write(f"Eindeutige Zeitstempel: {len(unique_times)}")
-        st.write(f"Duplikate: {len(time_values) - len(unique_times)}")
-
     # Sidebar für Benutzereingaben
     st.sidebar.header("Parameter")
 
-    # Verfügbare Szenarien abrufen
-    available_scenarios = list(np.unique(ds.scenario.values)) if 'scenario' in ds.coords else ["Standardszenario"]
+    # Mapping der Szenarien auf lesbare Labels
+    scenario_labels = {
+        "ssp126": "Nachhaltiges Szenario (SSP1-2.6)",
+        "ssp245": "Mittleres Szenario (SSP2-4.5)",
+        "ssp370": "Hohes Szenario (SSP3-7.0)",
+        "ssp585": "Extremes Szenario (SSP5-8.5)"
+    }
+
+    # Verfügbare Szenarien abrufen und mit Labels versehen
+    available_scenarios = [
+        scenario_labels.get(scenario, scenario) for scenario in np.unique(ds.scenario.values)
+    ] if 'scenario' in ds.coords else ["Standardszenario"]
 
     # Szenario-Auswahl
-    chosen_scenario = st.sidebar.selectbox("Szenario wählen", available_scenarios)
+    chosen_scenario_label = st.sidebar.selectbox("Szenario wählen", available_scenarios)
+    chosen_scenario = list(scenario_labels.keys())[list(scenario_labels.values()).index(
+        chosen_scenario_label)] if chosen_scenario_label in scenario_labels.values() else chosen_scenario_label
 
     # Basiseingaben
     min_snow_depth = st.sidebar.number_input("Mindestschneehöhe für Skifahren (m)", min_value=0.1, value=0.5, step=0.1)
@@ -295,7 +286,7 @@ def main():
     season_end_month = month_names.index(season_end) + 1
 
     # Hangfläche
-    slope_area = st.sidebar.number_input("Hangfläche (m²)", min_value=1000, value=50000, step=1000)
+    slope_area = st.sidebar.number_input("Hangfläche (m²)", min_value=1000, value=1000000, step=10000)
 
     # Prognosezeitraum
     st.sidebar.subheader("Prognosezeitraum")
@@ -326,22 +317,22 @@ def main():
                               value=12)
 
     # Zusatzstoffeingaben
-    st.sidebar.subheader("Zusatzstoffeffizienz")
-    additive_efficiency = st.sidebar.slider("Zusatzstoffeffizienz (%)",
-                                        min_value=5,
-                                        max_value=50,
-                                        value=20,
-                                        step=5) / 100
+    st.sidebar.subheader("Keimbildner")
+    additive_efficiency = st.sidebar.slider("Effizenz (in % der Ressourcenersparnis)",
+                                        min_value=0,
+                                        max_value=90,
+                                        value=30,
+                                        step=1) / 100
 
     # Kosten- und Ressourcenparameter
     st.sidebar.subheader("Kosten- und Ressourcenparameter")
-    additive_cost_per_m3 = st.sidebar.number_input("Zusatzstoffkosten pro m³ (€)", min_value=0.1, value=2.0, step=0.1)
+    additive_cost_per_m3 = st.sidebar.number_input("Zusatzstoffkosten pro m³ (CHF)", min_value=0.001, value=0.05, step=0.001)
     water_per_m3 = st.sidebar.number_input("Wasserverbrauch pro m³ Kunstschnee (l)", min_value=50, value=200, step=10)
     energy_per_m3 = st.sidebar.number_input("Energieverbrauch pro m³ Kunstschnee (kWh)", min_value=1.0, value=5.0,
                                       step=0.5)
-    water_cost_per_l = st.sidebar.number_input("Wasserkosten pro Liter (€)", min_value=0.0001, value=0.002, step=0.0005,
+    water_cost_per_l = st.sidebar.number_input("Wasserkosten pro Liter (CHF)", min_value=0.0001, value=0.002, step=0.0005,
                                           format="%.4f")
-    energy_cost_per_kwh = st.sidebar.number_input("Energiekosten pro kWh (€)", min_value=0.01, value=0.25, step=0.01)
+    energy_cost_per_kwh = st.sidebar.number_input("Energiekosten pro kWh (CHF)", min_value=0.01, value=0.25, step=0.01)
 
     # Parameter sammeln
     params = {
