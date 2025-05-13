@@ -85,22 +85,69 @@ def calculate_snow_resource_data(snow_data, params):
 def render_summary_metrics(df, start_date, end_date):
     """Zeigt die Zusammenfassungsmetriken an"""
     with st.expander("📘 Klicken Sie hier, um mehr über die dahinterstehenden Berechnungen zu erfahren"):
-        st.markdown("""
-    **Beispielberechnung basierend auf vorgegebenen Parametern:**
-    Nochfolgend wird mit Hilfe vorgegegebener Parametereinstellungen ein Rechenbeispiel durchgeführt, um die hinter den Zahlen stehenden Zahlen besser verstehen zu können. Die Parameter des Modells im Rechnebeispiel lauten wie folgt, und werden durch den Nutzenden definiert:
-    - 🗻 *Pistenfläche*: 1'000'000 m²
-    - ❄️ *Schneebedarf*: 1 m Schnee → 1'000'000 m³/Jahr
-    - 🗓️ *Zeitraum*: 2025–2033 (9 Jahre)
-    - 🔌 *Energiepreis*: 0.21 CHF/kWh
-    - 💧 *Wasserpreis*: 2.25 Rappen/Liter = 22.5 CHF/m³
-    - 🌡️ *Klimaszenario*: RCP 2.5 für Flims Laax
-    - 🧪 *Keimbildnerkosten*: 0.05 CHF/m³ Schnee
+    
 
-    Die Einsparungen basieren auf einer Effizienzsteigerung von 22 % durch den Einsatz eines Keimbildners bei der künstlichen Beschneiung.
+        st.markdown("## 🔢 Berechnungsgrundlagen")
+        st.markdown('Nachfolgend wird mit Hilfe angenommener Parameter ein Berechnungsbeispiel durchgeführt, um die hinter dem Modell stehenden Berechnungen zu erklären.')
+        st.markdown("### 📌 Annahmen")
+        st.markdown("""
+    - Klimaszenario: RCP 2.6  
+    - Analysezeitraum: 05.2025 bis 05.2030  
+    - Pistenfläche: 1'000'000 m²  
+    - Mindestschneehöhe: 1 m  
+    - Effizienzsteigerung durch Keimbildner: 30 %  
+    - Kosten Keimbildner: 0.05 CHF pro m³ Schnee  
+    - Wasserkosten: 0.002 CHF pro Liter  
+    - Energiekosten: 0.25 CHF pro kWh  
+    - Wasserverbrauch: 200 Liter pro m³ Schnee  
+    - Energieverbrauch: 5 kWh pro m³ Schnee  
     """)
+
+        st.markdown("### ❄️ Gesamter Schneebedarf")
+        st.latex(r"V = \text{Pistenfläche} \times \text{Schneehöhe} = 1'000'000 \times 1 = 1'000'000 \, \text{m}^3")
+
+        st.markdown("### 💧 Wasserverbrauch")
+        st.markdown("**Ohne Keimbildner:**")
+        st.latex(r"W_{\text{ohne}} = V \times 200\,\text{Liter} = 507'156.5 \times 0.2 = 101'431.3\,\text{m}^3")
+
+        st.markdown("**Mit Keimbildner (30 % Ersparnis):**")
+        st.latex(r"W_{\text{mit}} = V \times (1 - 0.30) \times 0.2 = 71'001.9\,\text{m}^3")
+
+        st.markdown("### ⚡ Energieverbrauch")
+        st.markdown("**Ohne Keimbildner:**")
+        st.latex(r"E_{\text{ohne}} = V \times 5 = 507'156.5 \times 5 = 2'535'782.7\,\text{kWh}")
+
+        st.markdown("**Mit Keimbildner (30 % Ersparnis):**")
+        st.latex(r"E_{\text{mit}} = V \times (1 - 0.30) \times 5 = 1'775'047.9\,\text{kWh}")
+
+        st.markdown("### 💰 Kosten")
+        st.markdown("**Ohne Keimbildner:**")
+        st.latex(r"""
+    K_{\text{ohne}} = 
+    W_{\text{ohne}} \times 0.002 +
+    E_{\text{ohne}} \times 0.25 =
+    101'431.3 \times 0.002 +
+    2'535'782.7 \times 0.25 =
+    836'808.28 \, \text{CHF}
+    """)
+
+        st.markdown("**Mit Keimbildner:**")
+        st.latex(r"""
+    K_{\text{mit}} =
+    W_{\text{mit}} \times 0.002 +
+    E_{\text{mit}} \times 0.25 +
+    V \times (1 - 0.30) \times 0.05 =
+    611'123.63 \, \text{CHF}
+    """)
+
+        st.markdown("**Ersparnis:**")
+        st.latex(r"K_{\text{Ersparnis}} = K_{\text{ohne}} - K_{\text{mit}} = 225'684.66 \, \text{CHF}")
+
+
     st.subheader(f"Zusammenfassung für den Zeitraum {start_date.strftime('%m.%Y')} bis {end_date.strftime('%m.%Y')}")
     st.markdown("#### ❄️ Schnee")
     st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
+
     col2, col3, col4 = st.columns(3)
 
 
