@@ -301,7 +301,7 @@ def main():
         return
 
     # Logo auf Sidebar einfügen
-    st.sidebar.image('https://i.imgur.com/wYofHK3.jpeg', width=120)
+    st.sidebar.image('https://i.imgur.com/pnZ1HBn.png', use_column_width=True)
     # Sidebar für Benutzereingaben
     st.sidebar.header("Einstellungen")
 
