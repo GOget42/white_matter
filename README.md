@@ -1,6 +1,6 @@
-# ❄️ SnowSaver – Optimizing Artificial Snow Production with Nucleating Agents
+# ❄️ WhiteMatter – Optimizing Artificial Snow Production with Nucleating Agents
 
-**SnowSaver** is an interactive Streamlit application designed to help ski resorts analyze and optimize the efficiency of artificial snow production. The tool compares resource usage and operational costs **with and without the use of nucleating agents**, based on scientifically grounded climate scenarios and user-defined parameters such as slope area, snow depth, and energy prices.
+**WhiteMatter** is an interactive Streamlit application designed to help ski resorts analyze and optimize the efficiency of artificial snow production. The tool compares resource usage and operational costs **with and without the use of nucleating agents**, based on scientifically grounded climate scenarios and user-defined parameters such as slope area, snow depth, and energy prices.
 
 ## 🔍 Key Features
 
