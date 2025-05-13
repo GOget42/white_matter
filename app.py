@@ -84,6 +84,20 @@ def calculate_snow_resource_data(snow_data, params):
 
 def render_summary_metrics(df, start_date, end_date):
     """Zeigt die Zusammenfassungsmetriken an"""
+    with st.expander("📘 Klicken Sie hier, um mehr über die dahinterstehenden Berechnungen zu erfahren"):
+        st.markdown("""
+    **Beispielberechnung basierend auf vorgegebenen Parametern:**
+    Nochfolgend wird mit Hilfe vorgegegebener Parametereinstellungen ein Rechenbeispiel durchgeführt, um die hinter den Zahlen stehenden Zahlen besser verstehen zu können. Die Parameter des Modells im Rechnebeispiel lauten wie folgt, und werden durch den Nutzenden definiert:
+    - 🗻 *Pistenfläche*: 1'000'000 m²
+    - ❄️ *Schneebedarf*: 1 m Schnee → 1'000'000 m³/Jahr
+    - 🗓️ *Zeitraum*: 2025–2033 (9 Jahre)
+    - 🔌 *Energiepreis*: 0.21 CHF/kWh
+    - 💧 *Wasserpreis*: 2.25 Rappen/Liter = 22.5 CHF/m³
+    - 🌡️ *Klimaszenario*: RCP 2.5 für Flims Laax
+    - 🧪 *Keimbildnerkosten*: 0.05 CHF/m³ Schnee
+
+    Die Einsparungen basieren auf einer Effizienzsteigerung von 22 % durch den Einsatz eines Keimbildners bei der künstlichen Beschneiung.
+    """)
     st.subheader(f"Zusammenfassung für den Zeitraum {start_date.strftime('%m.%Y')} bis {end_date.strftime('%m.%Y')}")
     st.markdown("#### ❄️ Schnee")
     st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
