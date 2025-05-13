@@ -442,6 +442,12 @@ def main():
     else:
         st.warning(
             "Keine Daten für die gewählten Parameter verfügbar. Bitte wählen Sie einen anderen Zeitraum oder ein anderes Szenario.")
+    # Footer
+    st.markdown("---")
+    st.markdown(
+    "<small>© 2025 WhiteMatter Insights | Entwickelt für die Weisse Arena Gruppe</small>",
+    unsafe_allow_html=True
+    )
 
 if __name__ == "__main__":
     main()
