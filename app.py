@@ -85,11 +85,10 @@ def calculate_snow_resource_data(snow_data, params):
 def render_summary_metrics(df, start_date, end_date):
     """Zeigt die Zusammenfassungsmetriken an"""
     st.subheader(f"Zusammenfassung für den Zeitraum {start_date.strftime('%m.%Y')} bis {end_date.strftime('%m.%Y')}")
-    col1, col2, col3, col4 = st.columns(4)
+    st.markdown("#### ❄️ Schnee")
+    st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
+    col2, col3, col4 = st.columns(3)
 
-    with col1:
-        st.markdown("#### ❄️ Schnee")
-        st.metric("Gesamter Schneebedarf", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
 
     with col2:
         st.markdown("#### 💧 Wasser")
