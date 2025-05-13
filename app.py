@@ -104,7 +104,8 @@ def render_summary_metrics(df, start_date, end_date):
     """)
 
         st.markdown("### ❄️ Gesamter Schneebedarf")
-        st.latex(r"V = \text{Pistenfläche} \times \text{Schneehöhe} = 1'000'000 \times 1 = 1'000'000 \, \text{m}^3")
+        st.markdown("Der Schneebedarf wird berechnet, indem die eingegebenen Mindestschneehöhe vom prognostizierten Schneefall gemäss ausgewähltem Szenario subtrahiert wird. Diese Differenz in Meter wird im Anschluss mit der eingegebenen Pistenfläche multipliziert.")
+        st.latex(r"V = (h_{\text{min}} - h_{\text{nat}}) \times A = 507'156.5 \, \text{m}^3")
 
         st.markdown("### 💧 Wasserverbrauch")
         st.markdown("**Ohne Keimbildner:**")
