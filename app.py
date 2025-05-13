@@ -300,6 +300,8 @@ def main():
     if ds is None:
         return
 
+    # Logo auf Sidebar einfügen
+    st.sidebar.image('https://i.imgur.com/wYofHK3.jpeg', width=120)
     # Sidebar für Benutzereingaben
     st.sidebar.header("Einstellungen")
 
