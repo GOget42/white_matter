@@ -86,39 +86,39 @@ def render_summary_metrics(df, start_date, end_date):
     """Displays the summary metrics"""
     st.subheader(f"Summary for the period {start_date.strftime('%m.%Y')} to {end_date.strftime('%m.%Y')}")
     st.markdown("#### ❄️ Snow")
-    st.metric("Total snow requirement", f"{df['Schneebedarf_m3'].sum():,.1f}".replace(",", "'") + " m³")
+    st.metric("Total snow requirement", f"{int(df['Schneebedarf_m3'].sum()):,}".replace(",", "'") + " m³")
 
     col2, col3, col4 = st.columns(3)
 
     with col2:
         st.markdown("#### 💧 Water")
-        ohne = df['Wasserverbrauch_l'].sum() / 1000
-        mit = df['Wasserverbrauch_mit_Additiv_l'].sum() / 1000
+        ohne = int(df['Wasserverbrauch_l'].sum() / 1000)
+        mit = int(df['Wasserverbrauch_mit_Additiv_l'].sum() / 1000)
         einsparung = ohne - mit
-        st.metric("Without nucleators", f"{ohne:,.1f}".replace(",", "'") + " m³")
-        st.metric("With nucleators", f"{mit:,.1f}".replace(",", "'") + " m³")
-        st.metric("Savings", f"{einsparung:,.1f}".replace(",", "'") + " m³",
-                  delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
+        st.metric("Without nucleators", f"{ohne:,}".replace(",", "'") + " m³")
+        st.metric("With nucleators", f"{mit:,}".replace(",", "'") + " m³")
+        st.metric("Savings", f"{einsparung:,}".replace(",", "'") + " m³",
+                  delta=f"{einsparung / ohne * 100:.0f}%" if ohne > 0 else None)
 
     with col3:
         st.markdown("#### ⚡ Energy")
-        ohne = df['Energieverbrauch_kwh'].sum()
-        mit = df['Energieverbrauch_mit_Additiv_kwh'].sum()
+        ohne = int(df['Energieverbrauch_kwh'].sum())
+        mit = int(df['Energieverbrauch_mit_Additiv_kwh'].sum())
         einsparung = ohne - mit
-        st.metric("Without nucleators", f"{ohne:,.1f}".replace(",", "'") + " kWh")
-        st.metric("With nucleators", f"{mit:,.1f}".replace(",", "'") + " kWh")
-        st.metric("Savings", f"{einsparung:,.1f}".replace(",", "'") + " kWh",
-                  delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
+        st.metric("Without nucleators", f"{ohne:,}".replace(",", "'") + " kWh")
+        st.metric("With nucleators", f"{mit:,}".replace(",", "'") + " kWh")
+        st.metric("Savings", f"{einsparung:,}".replace(",", "'") + " kWh",
+                  delta=f"{einsparung / ohne * 100:.0f}%" if ohne > 0 else None)
 
     with col4:
         st.markdown("#### 💰 Costs")
-        ohne = df['Gesamtkosten'].sum()
-        mit = df['Gesamtkosten_mit_Additiv'].sum()
-        einsparung = df['Kosteneinsparung'].sum()
-        st.metric("Without nucleators", f"{ohne:,.2f}".replace(",", "'") + " CHF")
-        st.metric("With nucleators", f"{mit:,.2f}".replace(",", "'") + " CHF")
-        st.metric("Savings", f"{einsparung:,.2f}".replace(",", "'") + " CHF",
-                  delta=f"{einsparung / ohne * 100:.1f}%" if ohne > 0 else None)
+        ohne = int(df['Gesamtkosten'].sum())
+        mit = int(df['Gesamtkosten_mit_Additiv'].sum())
+        einsparung = int(df['Kosteneinsparung'].sum())
+        st.metric("Without nucleators", f"{ohne:,}".replace(",", "'") + " CHF")
+        st.metric("With nucleators", f"{mit:,}".replace(",", "'") + " CHF")
+        st.metric("Savings", f"{einsparung:,}".replace(",", "'") + " CHF",
+                  delta=f"{einsparung / ohne * 100:.0f}%" if ohne > 0 else None)
 
 def plot_monthly_bar_chart(df, y_columns, title, y_axis_title, trace_names, unit_divisor=1, season_start_month=None,
                            season_end_month=None):
