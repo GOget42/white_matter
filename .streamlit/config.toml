@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#0B5394"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#D6EAF8"  # ← Hellblau für die Sidebar
+textColor = "#1C1C1C"
+font = "sans serif"
