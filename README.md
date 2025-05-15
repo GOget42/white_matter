@@ -1,6 +1,6 @@
-# ❄️ WhiteMatter – Optimizing Artificial Snow Production with Nucleating Agents
+# ❄️ WhiteMatter – Optimizing Technical Snow Production with Nucleating Agents
 
-**WhiteMatter** is an interactive Streamlit application designed to help ski resorts analyze and optimize the efficiency of artificial snow production. The tool compares resource usage and operational costs **with and without the use of nucleating agents**, based on scientifically grounded climate scenarios and user-defined parameters such as slope area, snow depth, and energy prices.
+**WhiteMatter** is an interactive Streamlit application designed to help ski resorts estimate the efficiency of using a nucleating agent. The tool compares resource usage and operational costs **with and without the use of nucleating agents**, based on scientifically grounded climate scenarios and user-defined parameters such as slope area, snow depth, and energy prices.
 
 ## 🔍 Key Features
 
@@ -12,4 +12,4 @@
 
 ## 🎯 Objective
 
-This application supports decision-makers in alpine regions by offering a transparent and flexible tool for **sustainable snow management** – both economically and ecologically.
+This application supports decision-makers in alpine regions by offering a transparent and flexible tool for **estimating the utility of nucleating agents** – both economically and ecologically.
